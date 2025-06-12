@@ -1,5 +1,5 @@
 import {View, Text, Image, FlatList, ActivityIndicator} from 'react-native'
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {images} from "@/constants/images";
 import {fetchMovies} from "@/services/api";
 import {useRouter} from "expo-router";
@@ -14,10 +14,24 @@ const Search = () => {
    const {
       data: movies,
       loading,
-      error
+      error,
+      refetch: loadMovies,
+      reset
    } = useFetch(() => fetchMovies({
       query: searchQuery
    }), false)
+
+   useEffect(() => {
+      const timeoutId = setTimeout(async () => {
+         if(searchQuery.trim()) {
+            await loadMovies();
+         } else {
+            reset()
+         }
+      }, 500);
+
+      return () => clearTimeout(timeoutId)
+   }, [searchQuery]);
 
    return (
       <View className="flex-1 bg-primary">
@@ -66,6 +80,15 @@ const Search = () => {
                      </Text>
                   )}
                </>
+            }
+            ListEmptyComponent={
+               !loading && !error ? (
+                  <View className="mt-10 px-5">
+                     <Text className="text-center text-gray-500">
+                        {searchQuery.trim() ? 'No movies found' : 'Search for a movie'}
+                     </Text>
+                  </View>
+               ) : null
             }
          />
       </View>
