@@ -47,3 +47,19 @@ export const updateSearchCount = async (query: string, movie: Movie) => {
       throw err;
    }
 }
+
+export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> => {
+   // Note: Notice how typescript wants a defined return type
+   try {
+      const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
+         Query.limit(5),
+         Query.orderDesc('count'),
+      ])
+
+      return result.documents as unknown as TrendingMovie[];
+      // How does this line work?
+   } catch (err) {
+      console.log(err)
+      return undefined
+   }
+}
